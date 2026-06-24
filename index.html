@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConvertFlow — Instant Unit Converter</title>
+  <meta name="description" content="Free instant unit converter for length, weight, temperature, speed, area, volume and more. Fast, accurate, no sign-up needed." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+
+  <!--
+    ========================================================
+    AD SLOTS — replace these comments with your AdSense tags
+    ========================================================
+    1. Header banner  → #ad-header
+    2. Sidebar right  → #ad-sidebar
+    3. Mid-page       → #ad-mid
+    4. Footer banner  → #ad-footer
+  -->
+
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --ink:      #0f0f10;
+      --paper:    #f7f7f5;
+      --mid:      #e8e8e4;
+      --muted:    #8a8a85;
+      --accent:   #2563ff;
+      --accent2:  #f97316;
+      --result:   #0d9f6e;
+      --radius:   10px;
+      --mono:     'DM Mono', monospace;
+      --sans:     'Inter', sans-serif;
+      --display:  'Syne', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── LAYOUT ── */
+    .site-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1.5px solid var(--mid);
+      padding: 18px 0 14px;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo {
+      font-family: var(--display);
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .logo span { color: var(--accent); }
+
+    /* ── AD BANNER PLACEHOLDER ── */
+    .ad-banner {
+      background: var(--mid);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: var(--mono);
+    }
+    #ad-header {
+      width: 100%;
+      height: 90px;
+      margin: 16px 0;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 36px 0 24px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── CATEGORY NAV ── */
+    .cat-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin: 28px 0 32px;
+    }
+    .cat-btn {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 1.5px solid var(--mid);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.01em;
+    }
+    .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .main-grid { grid-template-columns: 1fr; }
+      #ad-sidebar { display: none; }
+    }
+
+    /* ── CONVERTER CARD ── */
+    .converter-card {
+      background: #fff;
+      border: 1.5px solid var(--mid);
+      border-radius: 14px;
+      padding: 32px;
+    }
+    .converter-card h2 {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .converter-card .subtitle {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── CONVERTER FORM ── */
+    .conv-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 520px) {
+      .conv-row { grid-template-columns: 1fr; }
+      .swap-btn { width: 100%; }
+    }
+
+    .field-group label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field-group select,
+    .field-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--mid);
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 1rem;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-group select:focus,
+    .field-group input:focus { border-color: var(--accent); }
+    .field-group input[readonly] {
+      background: #f0fdf8;
+      border-color: #a7f3d0;
+      color: var(--result);
+      font-weight: 500;
+    }
+
+    .swap-btn {
+      padding: 11px 14px;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: end;
+    }
+    .swap-btn:hover { background: var(--accent); }
+
+    /* ── RESULT CALLOUT ── */
+    .result-box {
+      background: #f0fdf8;
+      border: 1.5px solid #a7f3d0;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-top: 4px;
+    }
+    .result-box .result-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .result-box .result-value {
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--result);
+      letter-spacing: -0.01em;
+      word-break: break-all;
+    }
+    .result-box .result-formula {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── MID AD ── */
+    #ad-mid {
+      height: 100px;
+      margin: 28px 0;
+    }
+
+    /* ── QUICK REFERENCE TABLE ── */
+    .ref-section h3 {
+      font-family: var(--display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .ref-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1.5px solid var(--mid);
+    }
+    .ref-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--mid);
+      font-family: var(--mono);
+    }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table tr:hover td { background: var(--paper); }
+
+    /* ── SIDEBAR ── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+    #ad-sidebar {
+      height: 600px;
+      border-radius: 14px;
+    }
+
+    .sidebar-card {
+      background: #fff;
+      border: 1.5px solid var(--mid);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .sidebar-card h3 {
+      font-family: var(--display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .quick-list { list-style: none; }
+    .quick-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--mid);
+      font-size: 0.83rem;
+    }
+    .quick-list li:last-child { border-bottom: none; }
+    .quick-list .ql-label { color: var(--muted); }
+    .quick-list .ql-val {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 60px;
+      border-top: 1.5px solid var(--mid);
+      padding: 28px 0;
+    }
+    #ad-footer {
+      height: 90px;
+      margin-bottom: 24px;
+    }
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .footer-inner p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="site-wrap">
+    <div class="header-inner">
+      <a href="#" class="logo">Convert<span>Flow</span></a>
+      <nav style="font-size:0.85rem; color:var(--muted); font-family:var(--mono);">
+        Fast · Free · Accurate
+      </nav>
+    </div>
+  </div>
+</header>
+
+<div class="site-wrap">
+
+  <!-- AD: Header banner -->
+  <div class="ad-banner" id="ad-header">Advertisement</div>
+
+  <section class="hero">
+    <h1>Convert anything,<br /><em>instantly.</em></h1>
+    <p>Length, weight, temperature, speed — pick a category and type. Results update as you go.</p>
+  </section>
+
+  <!-- Category navigation -->
+  <nav class="cat-nav" id="catNav">
+    <button class="cat-btn active" data-cat="length">📏 Length</button>
+    <button class="cat-btn" data-cat="weight">⚖️ Weight</button>
+    <button class="cat-btn" data-cat="temperature">🌡️ Temperature</button>
+    <button class="cat-btn" data-cat="speed">💨 Speed</button>
+    <button class="cat-btn" data-cat="area">📐 Area</button>
+    <button class="cat-btn" data-cat="volume">🧪 Volume</button>
+    <button class="cat-btn" data-cat="data">💾 Data</button>
+    <button class="cat-btn" data-cat="time">⏱️ Time</button>
+  </nav>
+
+  <div class="main-grid">
+    <!-- CONVERTER -->
+    <div>
+      <div class="converter-card">
+        <h2 id="convTitle">Length Converter</h2>
+        <p class="subtitle" id="convSubtitle">Convert between metres, feet, inches, miles and more.</p>
+
+        <div class="conv-row">
+          <div class="field-group">
+            <label for="fromVal">Value</label>
+            <input type="number" id="fromVal" placeholder="Enter value" value="1" />
+          </div>
+          <div class="field-group">
+            <label for="fromUnit">From</label>
+            <select id="fromUnit"></select>
+          </div>
+        </div>
+
+        <div class="conv-row">
+          <div class="field-group">
+            <label for="toVal">Result</label>
+            <input type="text" id="toVal" readonly placeholder="Result" />
+          </div>
+          <div class="field-group">
+            <label for="toUnit">To</label>
+            <select id="toUnit"></select>
+          </div>
+        </div>
+
+        <div style="text-align:center; margin: 8px 0 20px;">
+          <button class="swap-btn" id="swapBtn" title="Swap units">⇄ Swap</button>
+        </div>
+
+        <div class="result-box" id="resultBox">
+          <div class="result-label">Result</div>
+          <div class="result-value" id="resultBig">—</div>
+          <div class="result-formula" id="resultFormula"></div>
+        </div>
+      </div>
+
+      <!-- AD: Mid page -->
+      <div class="ad-banner" id="ad-mid">Advertisement</div>
+
+      <!-- Quick reference table -->
+      <div class="converter-card ref-section" id="refSection">
+        <h3 id="refTitle">Common length conversions</h3>
+        <table class="ref-table" id="refTable">
+          <thead>
+            <tr>
+              <th>From</th>
+              <th>To</th>
+              <th>Multiply by</th>
+            </tr>
+          </thead>
+          <tbody id="refBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- AD: Sidebar -->
+      <div class="ad-banner" id="ad-sidebar">Advertisement</div>
+
+      <div class="sidebar-card">
+        <h3>Quick facts</h3>
+        <ul class="quick-list" id="quickList"></ul>
+      </div>
+    </aside>
+  </div>
+
+</div>
+
+<footer>
+  <div class="site-wrap">
+    <div class="ad-banner" id="ad-footer">Advertisement</div>
+    <div class="footer-inner">
+      <p>© 2025 ConvertFlow — Free unit conversion tools</p>
+      <nav class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   DATA
+================================================================ */
+const CATEGORIES = {
+  length: {
+    title: "Length Converter",
+    subtitle: "Convert between metres, feet, inches, miles, kilometres and more.",
+    units: {
+      metre:      { label: "Metre (m)",          factor: 1 },
+      kilometre:  { label: "Kilometre (km)",      factor: 1000 },
+      centimetre: { label: "Centimetre (cm)",     factor: 0.01 },
+      millimetre: { label: "Millimetre (mm)",     factor: 0.001 },
+      mile:       { label: "Mile (mi)",           factor: 1609.344 },
+      yard:       { label: "Yard (yd)",           factor: 0.9144 },
+      foot:       { label: "Foot (ft)",           factor: 0.3048 },
+      inch:       { label: "Inch (in)",           factor: 0.0254 },
+      nautical:   { label: "Nautical Mile (nmi)", factor: 1852 },
+      lightyear:  { label: "Light Year (ly)",     factor: 9.461e15 },
+    },
+    refs: [
+      ["1 km",   "miles",    "0.6214"],
+      ["1 mile", "km",       "1.6093"],
+      ["1 m",    "feet",     "3.2808"],
+      ["1 foot", "metres",   "0.3048"],
+      ["1 inch", "cm",       "2.54"],
+      ["1 yard", "metres",   "0.9144"],
+    ],
+    quickFacts: [
+      ["Earth circumference", "40,075 km"],
+      ["Mount Everest",       "8,849 m"],
+      ["Marathon distance",   "42.195 km"],
+      ["1 light year",        "9.46 × 10¹⁵ m"],
+    ]
+  },
+
+  weight: {
+    title: "Weight & Mass Converter",
+    subtitle: "Convert kilograms, pounds, ounces, stone, tonnes and more.",
+    units: {
+      kilogram:   { label: "Kilogram (kg)",      factor: 1 },
+      gram:       { label: "Gram (g)",            factor: 0.001 },
+      milligram:  { label: "Milligram (mg)",      factor: 0.000001 },
+      tonne:      { label: "Metric Tonne (t)",    factor: 1000 },
+      pound:      { label: "Pound (lb)",          factor: 0.453592 },
+      ounce:      { label: "Ounce (oz)",          factor: 0.0283495 },
+      stone:      { label: "Stone (st)",          factor: 6.35029 },
+      uston:      { label: "US Ton (short ton)", factor: 907.185 },
+    },
+    refs: [
+      ["1 kg",   "pounds",    "2.2046"],
+      ["1 lb",   "kg",        "0.4536"],
+      ["1 stone","kg",        "6.3503"],
+      ["1 oz",   "grams",     "28.3495"],
+      ["1 tonne","pounds",    "2204.62"],
+    ],
+    quickFacts: [
+      ["Average human",        "70 kg"],
+      ["Blue whale",           "150,000 kg"],
+      ["Olympic barbell",      "20 kg"],
+      ["Grain of rice",        "~25 mg"],
+    ]
+  },
+
+  temperature: {
+    title: "Temperature Converter",
+    subtitle: "Convert Celsius, Fahrenheit and Kelvin instantly.",
+    units: {
+      celsius:    { label: "Celsius (°C)" },
+      fahrenheit: { label: "Fahrenheit (°F)" },
+      kelvin:     { label: "Kelvin (K)" },
+    },
+    refs: [
+      ["0 °C",   "°F",  "32"],
+      ["100 °C", "°F",  "212"],
+      ["−40 °C", "°F",  "−40 (equal!)"],
+      ["0 K",    "°C",  "−273.15 (absolute zero)"],
+      ["37 °C",  "°F",  "98.6 (body temp)"],
+    ],
+    quickFacts: [
+      ["Water freezes",    "0 °C / 32 °F"],
+      ["Water boils",      "100 °C / 212 °F"],
+      ["Body temperature", "37 °C / 98.6 °F"],
+      ["Absolute zero",    "−273.15 °C"],
+    ]
+  },
+
+  speed: {
+    title: "Speed Converter",
+    subtitle: "Convert km/h, mph, m/s, knots and more.",
+    units: {
+      kph:    { label: "Kilometres/hour (km/h)", factor: 1 },
+      mph:    { label: "Miles/hour (mph)",        factor: 1.60934 },
+      mps:    { label: "Metres/second (m/s)",     factor: 3.6 },
+      knot:   { label: "Knot (kn)",              factor: 1.852 },
+      fps:    { label: "Feet/second (fps)",       factor: 1.09728 },
+      mach:   { label: "Mach (at sea level)",     factor: 1234.8 },
+    },
+    refs: [
+      ["1 mph",   "km/h",   "1.6093"],
+      ["1 km/h",  "mph",    "0.6214"],
+      ["1 knot",  "km/h",   "1.852"],
+      ["1 m/s",   "km/h",   "3.6"],
+      ["Mach 1",  "km/h",   "1234.8"],
+    ],
+    quickFacts: [
+      ["Speed of light",   "299,792 km/s"],
+      ["Speed of sound",   "1,234.8 km/h"],
+      ["Usain Bolt peak",  "44.72 km/h"],
+      ["Formula 1 top",    "~372 km/h"],
+    ]
+  },
+
+  area: {
+    title: "Area Converter",
+    subtitle: "Convert square metres, acres, hectares, square feet and more.",
+    units: {
+      sqm:   { label: "Square Metre (m²)",     factor: 1 },
+      sqkm:  { label: "Square Kilometre (km²)",factor: 1e6 },
+      sqcm:  { label: "Square Centimetre (cm²)",factor: 0.0001 },
+      sqmi:  { label: "Square Mile (mi²)",     factor: 2589988.11 },
+      sqft:  { label: "Square Foot (ft²)",     factor: 0.092903 },
+      sqyd:  { label: "Square Yard (yd²)",     factor: 0.836127 },
+      acre:  { label: "Acre",                  factor: 4046.86 },
+      hect:  { label: "Hectare (ha)",          factor: 10000 },
+    },
+    refs: [
+      ["1 acre",    "m²",     "4046.86"],
+      ["1 hectare", "acres",  "2.471"],
+      ["1 km²",     "acres",  "247.1"],
+      ["1 mi²",     "km²",    "2.59"],
+      ["1 ft²",     "m²",     "0.0929"],
+    ],
+    quickFacts: [
+      ["Football pitch",   "~7,140 m²"],
+      ["Central Park",     "3.41 km²"],
+      ["Amazon rainforest","5.5M km²"],
+      ["Tennis court",     "260.87 m²"],
+    ]
+  },
+
+  volume: {
+    title: "Volume Converter",
+    subtitle: "Convert litres, gallons, cups, fluid ounces and more.",
+    units: {
+      litre:   { label: "Litre (L)",              factor: 1 },
+      ml:      { label: "Millilitre (mL)",        factor: 0.001 },
+      m3:      { label: "Cubic Metre (m³)",       factor: 1000 },
+      usgal:   { label: "US Gallon (gal)",        factor: 3.78541 },
+      ukgal:   { label: "UK Gallon (imp. gal)",   factor: 4.54609 },
+      usfloz:  { label: "US Fluid Ounce (fl oz)", factor: 0.0295735 },
+      cup:     { label: "US Cup",                 factor: 0.236588 },
+      tbsp:    { label: "Tablespoon (US tbsp)",   factor: 0.0147868 },
+      tsp:     { label: "Teaspoon (US tsp)",      factor: 0.00492892 },
+      pint:    { label: "US Pint (pt)",           factor: 0.473176 },
+    },
+    refs: [
+      ["1 US gal",  "litres",   "3.785"],
+      ["1 UK gal",  "litres",   "4.546"],
+      ["1 cup",     "mL",       "236.6"],
+      ["1 fl oz",   "mL",       "29.57"],
+      ["1 pint",    "litres",   "0.473"],
+    ],
+    quickFacts: [
+      ["Human blood volume",  "~5 litres"],
+      ["Olympic pool",        "2,500 m³"],
+      ["Can of soda",         "355 mL"],
+      ["Wine bottle",         "750 mL"],
+    ]
+  },
+
+  data: {
+    title: "Data Storage Converter",
+    subtitle: "Convert bytes, kilobytes, megabytes, gigabytes, terabytes and more.",
+    units: {
+      byte:  { label: "Byte (B)",       factor: 1 },
+      kb:    { label: "Kilobyte (KB)",  factor: 1024 },
+      mb:    { label: "Megabyte (MB)",  factor: 1048576 },
+      gb:    { label: "Gigabyte (GB)",  factor: 1073741824 },
+      tb:    { label: "Terabyte (TB)",  factor: 1099511627776 },
+      pb:    { label: "Petabyte (PB)",  factor: 1.126e15 },
+      bit:   { label: "Bit",            factor: 0.125 },
+      kbit:  { label: "Kilobit (Kbit)", factor: 128 },
+      mbit:  { label: "Megabit (Mbit)", factor: 131072 },
+      gbit:  { label: "Gigabit (Gbit)", factor: 134217728 },
+    },
+    refs: [
+      ["1 KB",  "bytes",   "1,024"],
+      ["1 MB",  "KB",      "1,024"],
+      ["1 GB",  "MB",      "1,024"],
+      ["1 TB",  "GB",      "1,024"],
+      ["1 byte","bits",    "8"],
+    ],
+    quickFacts: [
+      ["HD movie",          "~4–8 GB"],
+      ["MP3 (3 min)",       "~3–4 MB"],
+      ["4K photo",          "~25 MB"],
+      ["Typical hard drive","1–4 TB"],
+    ]
+  },
+
+  time: {
+    title: "Time Converter",
+    subtitle: "Convert seconds, minutes, hours, days, weeks and more.",
+    units: {
+      second: { label: "Second (s)",      factor: 1 },
+      minute: { label: "Minute (min)",    factor: 60 },
+      hour:   { label: "Hour (hr)",       factor: 3600 },
+      day:    { label: "Day",             factor: 86400 },
+      week:   { label: "Week",            factor: 604800 },
+      month:  { label: "Month (avg)",     factor: 2629746 },
+      year:   { label: "Year (365 days)", factor: 31536000 },
+      decade: { label: "Decade",          factor: 315360000 },
+      ms:     { label: "Millisecond (ms)",factor: 0.001 },
+      ns:     { label: "Nanosecond (ns)", factor: 1e-9 },
+    },
+    refs: [
+      ["1 min",   "seconds", "60"],
+      ["1 hour",  "minutes", "60"],
+      ["1 day",   "hours",   "24"],
+      ["1 week",  "days",    "7"],
+      ["1 year",  "days",    "365"],
+    ],
+    quickFacts: [
+      ["1 year",         "31,536,000 s"],
+      ["Light to Moon",  "~1.3 seconds"],
+      ["Human lifespan", "~2.5 billion s"],
+      ["1 millisecond",  "0.001 seconds"],
+    ]
+  }
+};
+
+/* ================================================================
+   TEMPERATURE SPECIAL CASE
+================================================================ */
+function convertTemp(val, from, to) {
+  let celsius;
+  if (from === "celsius")    celsius = val;
+  if (from === "fahrenheit") celsius = (val - 32) * 5/9;
+  if (from === "kelvin")     celsius = val - 273.15;
+
+  if (to === "celsius")    return celsius;
+  if (to === "fahrenheit") return celsius * 9/5 + 32;
+  if (to === "kelvin")     return celsius + 273.15;
+}
+
+function formulaTemp(from, to) {
+  const formulas = {
+    "celsius_fahrenheit":    "(°C × 9/5) + 32",
+    "fahrenheit_celsius":    "(°F − 32) × 5/9",
+    "celsius_kelvin":        "°C + 273.15",
+    "kelvin_celsius":        "K − 273.15",
+    "fahrenheit_kelvin":     "(°F − 32) × 5/9 + 273.15",
+    "kelvin_fahrenheit":     "(K − 273.15) × 9/5 + 32",
+  };
+  return formulas[`${from}_${to}`] || "";
+}
+
+/* ================================================================
+   APP STATE
+================================================================ */
+let currentCat = "length";
+
+/* ================================================================
+   BUILD UI
+================================================================ */
+function buildConverter(cat) {
+  const data = CATEGORIES[cat];
+  document.getElementById("convTitle").textContent    = data.title;
+  document.getElementById("convSubtitle").textContent = data.subtitle;
+
+  // Populate selects
+  const fromSel = document.getElementById("fromUnit");
+  const toSel   = document.getElementById("toUnit");
+  fromSel.innerHTML = "";
+  toSel.innerHTML   = "";
+
+  const keys = Object.keys(data.units);
+  keys.forEach((k, i) => {
+    const u = data.units[k];
+    fromSel.add(new Option(u.label, k));
+    toSel.add(new Option(u.label, k));
+  });
+
+  // Default: second unit
+  if (keys.length > 1) toSel.value = keys[1];
+
+  buildRefTable(cat);
+  buildQuickFacts(cat);
+  doConvert();
+}
+
+function buildRefTable(cat) {
+  const data = CATEGORIES[cat];
+  const tbody = document.getElementById("refBody");
+  document.getElementById("refTitle").textContent = `Common ${cat} conversions`;
+  tbody.innerHTML = "";
+  data.refs.forEach(([from, to, mult]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${from}</td><td>${to}</td><td>${mult}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildQuickFacts(cat) {
+  const data = CATEGORIES[cat];
+  const ul = document.getElementById("quickList");
+  ul.innerHTML = "";
+  data.quickFacts.forEach(([label, val]) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="ql-label">${label}</span><span class="ql-val">${val}</span>`;
+    ul.appendChild(li);
+  });
+}
+
+/* ================================================================
+   CONVERSION LOGIC
+================================================================ */
+function doConvert() {
+  const cat      = currentCat;
+  const data     = CATEGORIES[cat];
+  const fromKey  = document.getElementById("fromUnit").value;
+  const toKey    = document.getElementById("toUnit").value;
+  const rawVal   = parseFloat(document.getElementById("fromVal").value);
+
+  if (isNaN(rawVal)) {
+    document.getElementById("toVal").value      = "";
+    document.getElementById("resultBig").textContent    = "—";
+    document.getElementById("resultFormula").textContent = "";
+    return;
+  }
+
+  let result;
+  let formula = "";
+
+  if (cat === "temperature") {
+    result  = convertTemp(rawVal, fromKey, toKey);
+    formula = formulaTemp(fromKey, toKey);
+  } else {
+    const fromFactor = data.units[fromKey].factor;
+    const toFactor   = data.units[toKey].factor;
+    result = rawVal * (fromFactor / toFactor);
+    formula = fromKey === toKey ? "Same unit — no conversion needed."
+              : `1 ${data.units[fromKey].label.split(" ")[0]} = ${(fromFactor / toFactor).toPrecision(6)} ${data.units[toKey].label.split(" ")[0]}`;
+  }
+
+  const formatted = formatResult(result);
+  document.getElementById("toVal").value             = formatted;
+  document.getElementById("resultBig").textContent   = `${formatted} ${data.units[toKey].label.split("(")[1]?.replace(")", "") || data.units[toKey].label}`;
+  document.getElementById("resultFormula").textContent = formula;
+}
+
+function formatResult(n) {
+  if (n === 0) return "0";
+  const abs = Math.abs(n);
+  if (abs >= 1e12 || (abs > 0 && abs < 1e-6)) return n.toExponential(6);
+  if (abs >= 1000)  return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  return parseFloat(n.toPrecision(8)).toString();
+}
+
+/* ================================================================
+   EVENT WIRING
+================================================================ */
+document.getElementById("catNav").addEventListener("click", e => {
+  const btn = e.target.closest(".cat-btn");
+  if (!btn) return;
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentCat = btn.dataset.cat;
+  buildConverter(currentCat);
+});
+
+document.getElementById("fromVal").addEventListener("input",   doConvert);
+document.getElementById("fromUnit").addEventListener("change", doConvert);
+document.getElementById("toUnit").addEventListener("change",   doConvert);
+
+document.getElementById("swapBtn").addEventListener("click", () => {
+  const fromSel = document.getElementById("fromUnit");
+  const toSel   = document.getElementById("toUnit");
+  const temp    = fromSel.value;
+  fromSel.value = toSel.value;
+  toSel.value   = temp;
+  doConvert();
+});
+
+/* ================================================================
+   INIT
+================================================================ */
+buildConverter("length");
+</script>
+</body>
+</html>
